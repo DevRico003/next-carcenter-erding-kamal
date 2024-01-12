@@ -59,8 +59,11 @@ jobs:
         bundler-cache: true
         ruby-version: 2.7.2
 
+    - name: Install Kamal
+      run: gem install kamal
+
     - name: Deploy command
-      run: exec kamal deploy --skip-push
+      run: kamal deploy --skip-push
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
