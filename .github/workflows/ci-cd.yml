@@ -16,6 +16,7 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       IMAGE_NAME: next-carcenter-erding-kamal
+      RAILS_ENV: production
 
     steps:
     - name: Checkout code
@@ -56,6 +57,7 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+        ruby-version: 2.7.2
 
     - name: Deploy command
       run: bundle exec kamal deploy --skip-push
