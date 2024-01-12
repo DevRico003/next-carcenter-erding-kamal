@@ -48,14 +48,14 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    # - uses: webfactory/ssh-agent@v0.5.1
-    #   with:
-    #     ssh-private-key: ${{ secrets.SSH_PK }}
+    - uses: webfactory/ssh-agent@v0.5.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PK }}
 
-    # - name: Set up Ruby
-    #   uses: ruby/setup-ruby@v1
-    #   with:
-    #     bundler-cache: true
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
 
     - name: Deploy command
       run: bundle exec kamal deploy --skip-push
