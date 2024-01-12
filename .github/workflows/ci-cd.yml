@@ -44,7 +44,7 @@ jobs:
         builder: ${{ steps.buildx.outputs.name }}
         push: true
         labels: |
-          "service=next-carcenter-erding-kamal"
+          "service=next-carcenter-erding"
         tags: |
           "devrico003/next-carcenter-erding-kamal:latest"
           "devrico003/next-carcenter-erding-kamal:${{ steps.tag.outputs.tag }}"
