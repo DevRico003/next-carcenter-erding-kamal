@@ -1,0 +1,62 @@
+# Name of your application. Used to uniquely configure containers.
+service: next-carcenter-erding
+
+# Name of the container image.
+image: devrico003/next-carcenter-erding-kamal
+
+# Deploy to these servers.
+servers:
+  -  194.180.176.130
+
+registry:
+  username: 
+    - KAMAL_REGISTRY_USERNAME
+
+  # Always use an access token rather than real password when possible.
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+
+env:
+  clear:
+    DB_HOST: 95.111.234.126
+  secret:
+    - KAMAL_REGISTRY_USERNAME
+    - KAMAL_REGISTRY_PASSWORD
+    - ENCODED_CREDENTIALS
+    - SENDGRID_API_KEY
+    - MONGODB_URI
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_REGION
+    - AWS_BUCKET_NAME
+
+traefik:
+  options:
+    publish:
+      - 443:443
+  args:
+    entryPoints.web.address: ":80"
+    entryPoints.web.http.redirections.entryPoint.to: websecure
+    entryPoints.web.http.redirections.entryPoint.scheme: https
+    entryPoints.web.http.redirections.entrypoint.permanent: true
+
+    entryPoints.websecure.address: ":443"
+    entrypoints.websecure.http.tls: true
+    entrypoints.websecure.http.tls.domains[0].main: "kamal.devrico003.com"
+    accesslog: true
+    accesslog.format: json
+
+accessories:
+  db:
+    image: mongo
+    host: 95.111.234.126
+    port: 27017
+    env:
+      clear:
+        MYSQL_ROOT_HOST: 95.111.234.126
+      secret:
+        - MONGO_INITDB_ROOT_USERNAME
+        - MONGO_INITDB_ROOT_PASSWORD
+    directories:
+      - data:/data/db

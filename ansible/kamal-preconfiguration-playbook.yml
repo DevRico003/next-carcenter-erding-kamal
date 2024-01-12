@@ -1,0 +1,188 @@
+---
+- hosts: all
+  become: true
+  vars:
+    new_user: "rico003"
+    ssh_public_key: "/home/rico003/.ssh/contabo_vps_ec.pub"
+  
+  tasks:
+    - name: Create a new user
+      user:
+        name: "{{ new_user }}"
+        state: present
+        create_home: yes
+        shell: /bin/bash
+
+    - name: Add authorized key for the new user
+      authorized_key:
+        user: "{{ new_user }}"
+        state: present
+        key: "{{ lookup('file', ssh_public_key) }}"
+
+    - name: Add new user to sudoers
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^{{ new_user }}"
+        line: "{{ new_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+        validate: visudo -cf %s
+
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+      notify: restart ssh
+
+    - name: Disable password authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication no"
+      notify: restart ssh
+
+    - name: Disable empty passwords
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: "^PermitEmptyPasswords"
+        line: "PermitEmptyPasswords no"
+      notify: restart ssh
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600 # Cache valid time in seconds
+
+    - name: Wait for 1 minute
+      pause:
+        minutes: 1
+
+    - name: Upgrade all packages to the latest version
+      apt:
+        upgrade: 'dist'
+        force_apt_get: yes
+
+    - name: Wait for 1 minute
+      pause:
+        minutes: 1
+
+    - name: Upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+          - build-essential
+          - curl
+          - fail2ban
+          - git
+          - htop
+          - ntp
+          - ufw
+          - vim
+        state: latest
+        update_cache: yes
+        autoremove: yes
+        autoclean: yes
+      notify:
+        - start ntp
+        - start fail2ban
+
+    - name: Add Docker’s official GPG key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Set up the Docker repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: yes
+
+    - name: Add user to the docker group
+      ansible.builtin.user:
+        name: "{{ new_user }}"
+        groups: docker
+        append: yes
+
+    - name: Ensure Docker is started and enabled
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Remove snap
+      apt:
+        name:
+          - snapd
+          - snap
+        state: absent
+        purge: true
+
+    - name: Configure ufw defaults
+      ufw:
+        direction: "{{ item.direction }}"
+        policy: "{{ item.policy }}"
+      loop:
+        - direction: incoming
+          policy: deny
+        - direction: outgoing
+          policy: allow
+
+    - name: Configure ufw rules
+      ufw:
+        rule: "{{ item.rule }}"
+        port: "{{ item.port }}"
+        proto: "{{ item.proto }}"
+      loop:
+        - rule: 'limit'
+          port: '22'
+          proto: 'tcp'
+        - rule: 'allow'
+          port: '80'
+          proto: 'tcp'
+        - rule: 'allow'
+          port: '443'
+          proto: 'tcp'
+
+    - name: Enable ufw
+      ufw:
+        state: enabled
+
+  handlers:
+    - name: start ntp
+      service:
+        name: ntp
+        state: started
+        enabled: yes
+
+    - name: start fail2ban
+      service:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
+
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
