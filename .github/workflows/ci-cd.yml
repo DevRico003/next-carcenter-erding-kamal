@@ -32,16 +32,16 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Set Tag
-      id: tag
-      run: |
-        echo "tag=$(git rev-parse "$GITHUB_SHA")" >> $GITHUB_OUTPUT
+    # - name: Set Tag
+    #   id: tag
+    #   run: |
+    #     echo "tag=$(git rev-parse "$GITHUB_SHA")" >> $GITHUB_OUTPUT
 
     - name: Build image
       uses: docker/build-push-action@v5
       with:
         context: .
-        builder: ${{ steps.buildx.outputs.name }}
+        # builder: ${{ steps.buildx.outputs.name }}
         push: true
         labels: |
           "service=next-carcenter-erding-kamal"
