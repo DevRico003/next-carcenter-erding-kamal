@@ -70,6 +70,6 @@ accessories:
     directories:
       - data:/data/db
 
-# healthcheck:
-#   path: /api/up
-#   port: 80
+healthcheck:
+  path: /api/up
+  port: 443
