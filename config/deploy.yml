@@ -6,7 +6,33 @@ image: devrico003/next-carcenter-erding-kamal
 
 # Deploy to these servers.
 servers:
-  -  194.180.176.130
+  web:
+    hosts:
+      -  84.247.136.227
+    labels:
+      traefik.http.routers.kiqr_cloud.rule: Host(`kamal.devrico003.com`)
+      traefik.http.routers.kiqr_cloud_secure.entrypoints: websecure
+      traefik.http.routers.kiqr_cloud_secure.rule: Host(`kamal.devrico003.com`)
+      traefik.http.routers.kiqr_cloud_secure.tls: true
+      traefik.http.routers.kiqr_cloud_secure.tls.certresolver: letsencrypt
+
+
+traefik:
+  options:
+    publish:
+      - "443:443"
+    volume:
+      - "/letsencrypt/acme.json:/letsencrypt/acme.json" 
+  args:
+    entryPoints.web.address: ":80"
+    entryPoints.websecure.address: ":443"
+    entryPoints.web.http.redirections.entryPoint.to: websecure
+    entryPoints.web.http.redirections.entryPoint.scheme: https
+    entryPoints.web.http.redirections.entrypoint.permanent: true
+    certificatesResolvers.letsencrypt.acme.email: "palermo003@gmail.com"
+    certificatesResolvers.letsencrypt.acme.storage: "/letsencrypt/acme.json"
+    certificatesResolvers.letsencrypt.acme.httpchallenge: true
+    certificatesResolvers.letsencrypt.acme.httpchallenge.entrypoint: web 
 
 registry:
   username: 
@@ -16,10 +42,9 @@ registry:
   password:
     - DOCKERHUB_TOKEN
 
-
 env:
   clear:
-    DB_HOST: 95.111.234.126
+    DB_HOST: 173.249.33.169
   secret:
     - ENCODED_CREDENTIALS
     - SENDGRID_API_KEY
@@ -28,31 +53,17 @@ env:
     - AWS_SECRET_ACCESS_KEY
     - AWS_REGION
     - AWS_BUCKET_NAME
+  
 
-traefik:
-  options:
-    publish:
-      - 443:443
-  args:
-    entryPoints.web.address: ":80"
-    entryPoints.web.http.redirections.entryPoint.to: websecure
-    entryPoints.web.http.redirections.entryPoint.scheme: https
-    entryPoints.web.http.redirections.entrypoint.permanent: true
-
-    entryPoints.websecure.address: ":443"
-    entrypoints.websecure.http.tls: true
-    entrypoints.websecure.http.tls.domains[0].main: "kamal.devrico003.com"
-    accesslog: true
-    accesslog.format: json
 
 accessories:
   db:
     image: mongo
-    host: 95.111.234.126
+    host: 173.249.33.169
     port: 27017
     env:
       clear:
-        MYSQL_ROOT_HOST: 95.111.234.126
+
       secret:
         - MONGO_INITDB_ROOT_USERNAME
         - MONGO_INITDB_ROOT_PASSWORD

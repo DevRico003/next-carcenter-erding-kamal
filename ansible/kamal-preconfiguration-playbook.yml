@@ -60,19 +60,10 @@
       pause:
         minutes: 1
 
-    - name: Upgrade all packages to the latest version
-      apt:
-        upgrade: 'dist'
-        force_apt_get: yes
-
-    - name: Wait for 1 minute
-      pause:
-        minutes: 1
-
-    - name: Upgrade packages
-      apt:
-        update_cache: yes
-        upgrade: yes
+    # - name: Upgrade all packages to the latest version
+    #   apt:
+    #     upgrade: 'dist'
+    #     force_apt_get: yes
 
     - name: Install packages
       apt:
@@ -143,7 +134,33 @@
           policy: deny
         - direction: outgoing
           policy: allow
+        
+  handlers:
+    - name: start ntp
+      service:
+        name: ntp
+        state: started
+        enabled: yes
 
+    - name: start fail2ban
+      service:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
+    
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
+
+- hosts: nextjs
+  become: true
+  tasks:
     - name: Configure ufw rules
       ufw:
         rule: "{{ item.rule }}"
@@ -163,26 +180,23 @@
     - name: Enable ufw
       ufw:
         state: enabled
+    
+- hosts: mongodb
+  become: true
+  tasks:
+    - name: Configure ufw rules
+      ufw:
+        rule: "{{ item.rule }}"
+        port: "{{ item.port }}"
+        proto: "{{ item.proto }}"
+      loop:
+        - rule: 'limit'
+          port: '22'
+          proto: 'tcp'
+        - rule: 'allow'
+          port: '27017'
+          proto: 'tcp'
 
-  handlers:
-    - name: start ntp
-      service:
-        name: ntp
-        state: started
-        enabled: yes
-
-    - name: start fail2ban
-      service:
-        name: fail2ban
-        state: started
-        enabled: yes
-
-    - name: restart docker
-      service:
-        name: docker
-        state: restarted
-
-    - name: restart ssh
-      service:
-        name: ssh
-        state: restarted
+    - name: Enable ufw
+      ufw:
+        state: enabled
