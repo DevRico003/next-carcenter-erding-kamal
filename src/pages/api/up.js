@@ -1,3 +1,5 @@
-export default function handler(req, res) {
-    res.status(200).send('Up!');
+export async function GET() {
+    return new Response('Up!', {
+      status: 200
+    })
   }
