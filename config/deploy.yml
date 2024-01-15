@@ -69,3 +69,7 @@ accessories:
         - MONGO_INITDB_ROOT_PASSWORD
     directories:
       - data:/data/db
+
+healthcheck:
+  path: /api/up
+  port: 80
