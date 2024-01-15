@@ -72,4 +72,4 @@ accessories:
 
 healthcheck:
   path: /api/up
-  port: 443
+  port: 3000
