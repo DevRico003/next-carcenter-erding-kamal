@@ -43,4 +43,5 @@ jobs:
         password: ${{secrets.MAIL_PASSWORD}}
         subject: CI/CD Pipeline failed
         to: ${{secrets.MAIL}}
+        from: ${{secrets.MAIL_USERNAME}}
         body: The pipeline has failed. Please check the GitHub Actions output.
