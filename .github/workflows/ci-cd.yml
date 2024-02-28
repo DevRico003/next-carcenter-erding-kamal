@@ -21,22 +21,10 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '18'
-    - name: Check for package-lock.json
-      id: lockfile
-      run: |
-        if [[ -f package-lock.json ]]; then
-          echo "::set-output name=exists::true"
-        else
-          echo "::set-output name=exists::false"
-        fi
 
     - name: Install dependencies
-      run: |
-        if [[ "${{ steps.lockfile.outputs.exists }}" == "true" ]]; then
-          npm ci
-        else
-          npm install
-        fi
+      run: npm ci
+
     - name: Build
       run: npm run build
 
@@ -47,7 +35,7 @@ jobs:
     - name: Run tests
       run: npm test
 
-  security:
+  security_and_notify:
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -55,15 +43,9 @@ jobs:
       uses: snyk/actions/node@0.3.0
       with:
         args: --severity-threshold=high
-        fail-on-issues: true # This will make the workflow fail if issues are found
-
-  notify:
-    needs: security
-    runs-on: ubuntu-latest
-    environment: Production
-    if: failure() # This job will only run if the previous job fails
-    steps:
+        fail-on-issues: true
     - name: Send failure notification
+      if: failure()
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
