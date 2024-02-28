@@ -32,6 +32,7 @@ jobs:
       with:
         args: --severity-threshold=high
         fail-on-issues: true
+        token: ${{ secrets.SNYK_TOKEN }}
 
     - name: Send failure notification
       if: failure()
