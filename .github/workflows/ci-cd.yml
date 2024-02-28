@@ -34,6 +34,11 @@ jobs:
       with:
         args: --severity-threshold=high --json > snyk_report.json
 
+    - name: Prepare Snyk report
+      run: |
+        echo "Snyk report:" > mail_body.txt
+        cat snyk_report.json >> mail_body.txt
+
     - name: Send Snyk report
       if: failure()
       uses: dawidd6/action-send-mail@v3
@@ -45,6 +50,4 @@ jobs:
         subject: Snyk Report
         to: ${{secrets.MAIL}}
         from: ${{secrets.MAIL_USERNAME}}
-        body: |
-          Snyk report:
-          $(cat snyk_report.json)
+        body: ${{join('', steps.read.outputs.text)}}
