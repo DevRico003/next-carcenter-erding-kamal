@@ -32,7 +32,7 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --severity-threshold=high
+        args: --severity-threshold=high --json > snyk_report.json
 
     - name: Send failure notification
       if: failure()
@@ -45,4 +45,7 @@ jobs:
         subject: CI/CD Pipeline failed
         to: ${{secrets.MAIL}}
         from: ${{secrets.MAIL_USERNAME}}
-        body: The pipeline has failed. Please check the GitHub Actions output.
+        body: | 
+          The pipeline has failed. Please check the GitHub Actions output and the Snyk Report in this email.
+          Snyk report: 
+          $(cat snyk_report.json)
