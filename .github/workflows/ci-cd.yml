@@ -6,17 +6,13 @@ on:
       - main
 
 jobs:
-  source:
+  build_test_security_notify:
     runs-on: ubuntu-latest
+    environment: Production
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-  build:
-    needs: source
-    runs-on: ubuntu-latest
-    environment: Production
-    steps:
     - name: Setup Node.js environment
       uses: actions/setup-node@v2
       with:
@@ -28,22 +24,15 @@ jobs:
     - name: Build
       run: npm run build
 
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
     - name: Run tests
       run: npm test
 
-  security_and_notify:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
     - name: Run Snyk to check for vulnerabilities
       uses: snyk/actions/node@0.3.0
       with:
         args: --severity-threshold=high
         fail-on-issues: true
+
     - name: Send failure notification
       if: failure()
       uses: dawidd6/action-send-mail@v3
