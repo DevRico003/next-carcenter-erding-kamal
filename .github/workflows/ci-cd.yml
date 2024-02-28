@@ -28,11 +28,11 @@ jobs:
     #   run: npm test
 
     - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@0.3.0
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
-        fail-on-issues: true
-        token: ${{ secrets.SNYK_TOKEN }}
 
     - name: Send failure notification
       if: failure()
