@@ -28,19 +28,14 @@ jobs:
     #   run: npm test
 
     - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@master
+      id: snyk
+      run: |
+        echo "::set-output name=report::$(npx snyk test --severity-threshold=high --json)"
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high --json > snyk_report.json
-
-    - name: Prepare Snyk report
-      run: |
-        echo "Snyk report:" > mail_body.txt
-        cat snyk_report.json >> mail_body.txt
 
     - name: Send Snyk report
-      if: failure()
+      if: always()
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
@@ -50,4 +45,4 @@ jobs:
         subject: Snyk Report
         to: ${{secrets.MAIL}}
         from: ${{secrets.MAIL_USERNAME}}
-        body: ${{join('', steps.read.outputs.text)}}
+        body: ${{steps.snyk.outputs.report}}
