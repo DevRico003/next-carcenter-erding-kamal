@@ -28,21 +28,21 @@ jobs:
     #   run: npm test
 
     - name: Run Snyk to check for vulnerabilities
-      id: snyk
-      run: |
-        echo "::set-output name=report::$(npx snyk test --severity-threshold=high --json)"
+      uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high 
 
-    - name: Send Snyk report
-      if: always()
+    - name: Send failure notification
+      if: failure()
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
         server_port: 465
         username: ${{secrets.MAIL_USERNAME}}
         password: ${{secrets.MAIL_PASSWORD}}
-        subject: Snyk Report
+        subject: CI/CD Pipeline failed
         to: ${{secrets.MAIL}}
         from: ${{secrets.MAIL_USERNAME}}
-        body: ${{steps.snyk.outputs.report}}
+        body: The pipeline has failed. Please check the GitHub Actions output.
