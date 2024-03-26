@@ -16,7 +16,7 @@
     "fs": "^0.0.1-security",
     "intl-tel-input": "^18.2.1",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.0.3",
+    "mongoose": "^8.2.1",
     "next": "^13.5.6",
     "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
